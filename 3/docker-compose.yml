@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  app:
+    image: bfabio/banner-db
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_USER: root
+      APP_PASSWORD: mysql
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: app
+      MYSQL_ROOT_PASSWORD: mysql
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: /usr/bin/mysql -h localhost --user=root --password=mysql --execute "SHOW DATABASES;"
+      interval: 5s
+      retries: 10
+    ports:
+      - '3306:3306'
